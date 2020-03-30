@@ -2,9 +2,21 @@
 import React from "react";
 import "./App.css";
 function Numbers(props) {
-  return (
+    return (
     <div className="number_warp">
-      numbers{/* 根据props传入的数据生成按钮 */}
+        {/* 根据props传入的数据生成按钮 */}
+        {props.numberArrays.map(item =>
+            <button
+                key={item.label}
+                onClick={() => {
+                    props.click(item.label);
+                }}
+            >
+                {item.label}
+            </button>
+
+        )}
+
     </div>
   );
 }
@@ -44,7 +56,17 @@ const buttons = [
 function Actions(props) {
   return (
     <div className="action_warp">
-      actions {/* 根据props传入的数据生成按钮 */}
+       {/* 根据props传入的数据生成按钮 */}
+        {props.operationSigns.map(item =>
+            <button
+                key={item.label}
+                onClick={() => {
+                    props.click(item.label);
+                }}
+            >
+                {item.label}
+            </button>
+        )}
     </div>
   );
 }
@@ -81,29 +103,70 @@ class App extends React.Component {
   //算式方法组件点击后处理方法
   actionsClick = e => {
     // 如果有错误信息，只能点击C按钮
+      if ("C" === e) {
+          this.error = "";
+          this.setState({
+              evalStr: "",
+              result: ""
+          });
+          return;
+      }
     // 如果点击C按钮清除 错误信息,需要计算的算式，计算结果
     // 如果点击的=,计算算式。 如果错误显示错误提示
     // 如果点击是一般计算方法符号，在当前算术式后面累加
+      if("=" === e){
+        let result='';
+        try{
+          result=eval(this.state.evalStr);
+
+        }catch (exception){
+
+          result='';
+
+        }
+
+          this.setState({
+              result
+          });
+          return;
+      }
+
+      this.setState({
+          evalStr: this.state.evalStr + e
+      });
+
   };
   //数字按钮点击后的处理方法
   numClick = e => {
     //直接在当前算式后面累加输入的数字
+      this.setState({
+          evalStr: this.state.evalStr + e
+      });
   };
   //手动修改算式的处理方法
   inputOnChange = e => {
     e.persist();
     //算式显示区域可以手动修改算式
+      this.setState({
+          evalStr: e.target.value
+      });
   };
   render() {
     return (
       <div className="warp">
-        <input />
-        <div className="result" />
+        <input
+            value={this.state.evalStr}
+            onChange={this.inputOnChange}
+        />
+          <div className="result"> {this.state.result===''?this.errorMsg:this.state.result}
+          </div>
+
         {/* 显示计算结果和错误提示 */}
 
         {/* 引入方法按钮组件 */}
+        <Actions click={this.actionsClick} operationSigns={funs}/>
 
-        {/* 引入数字按钮组件 */}
+        <Numbers click={this.numClick} numberArrays={buttons}/>
       </div>
     );
   }
